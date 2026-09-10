@@ -10,28 +10,28 @@ The platform enforces a strict separation of concerns between the **Data Plane**
 
 ```mermaid
 flowchart TD
-    Client[Client Applications] -->|HTTP Request + X-API-Key| Gateway[FastAPI Data Plane Proxy: /{path:path}]
+    Client[Client Applications] -->|HTTP Request + X-API-Key| Gateway["FastAPI Data Plane Proxy: /{path}"]
 
     subgraph DataPlane [High-Throughput Data Plane]
-        Gateway --> Auth[1. SHA-256 Auth & Redis In-Memory Cache]
-        Auth --> RateLimit[2. Atomic Lua Sliding-Window ZSET Rate Limiter]
-        RateLimit -->|Allowed| Upstream[3. Persistent AsyncClient TCP Pool -> Upstream API]
+        Gateway --> Auth["1. SHA-256 Auth and Redis In-Memory Cache"]
+        Auth --> RateLimit["2. Atomic Lua Sliding-Window ZSET Rate Limiter"]
+        RateLimit -->|Allowed| Upstream["3. Persistent AsyncClient TCP Pool to Upstream API"]
         RateLimit -->|Exceeded| Blocked[Return HTTP 429 Too Many Requests]
-        Upstream -->|Non-Blocking Telemetry| StreamQueue[4. asyncio.create_task -> Redis Streams]
+        Upstream -->|Non-Blocking Telemetry| StreamQueue["4. asyncio.create_task to Redis Streams"]
     end
 
-    subgraph BackgroundDaemons [Background Daemons & Alert Engine]
-        StreamQueue --> TelemetryWorker[Telemetry Ingestion Worker: Batch Reader]
+    subgraph BackgroundDaemons [Background Daemons and Alert Engine]
+        StreamQueue --> TelemetryWorker["Telemetry Ingestion Worker: Batch Reader"]
         TelemetryWorker -->|Bulk Insert| ClickHouse[(ClickHouse OLAP Engine)]
-        AlertWorker[Alert Engine: Periodic Evaluator] -->|Query Metrics| ClickHouse
-        AlertWorker -->|Threshold Violation| WebhookDispatcher[Webhook Dispatcher -> External Endpoints]
+        AlertWorker["Alert Engine: Periodic Evaluator"] -->|Query Metrics| ClickHouse
+        AlertWorker -->|Threshold Violation| WebhookDispatcher["Webhook Dispatcher to External Endpoints"]
     end
 
     subgraph ControlPlane [Control Plane Management API]
-        Admin[Admin / Dashboard] --> AdminRouter[/admin/* Endpoints]
-        AdminRouter -->|Tenants & Keys CRUD| Postgres[(PostgreSQL Operational DB)]
+        Admin[Admin / Dashboard] --> AdminRouter["/admin/* Endpoints"]
+        AdminRouter -->|Tenants and Keys CRUD| Postgres[(PostgreSQL Operational DB)]
         AdminRouter -->|Key Issuance / Invalidation| RedisCache[(Redis In-Memory Cache)]
-        AdminRouter -->|Analytics & Percentiles| ClickHouse
+        AdminRouter -->|Analytics and Percentiles| ClickHouse
     end
 ```
 
