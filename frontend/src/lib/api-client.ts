@@ -98,9 +98,11 @@ export const apiClient = {
   },
 
   // --- API Keys ---
-  getKeys: (tenantId?: string) => {
+  getKeys: async (tenantId?: string): Promise<{ items: ApiKey[]; total: number }> => {
     const url = tenantId ? `/admin/keys?tenant_id=${tenantId}` : "/admin/keys";
-    return fetchJson<{ items: ApiKey[]; total: number }>(url);
+    const res = await fetchJson<{ keys?: ApiKey[]; items?: ApiKey[]; total?: number }>(url);
+    const keyList = res.items || res.keys || [];
+    return { items: keyList, total: res.total ?? keyList.length };
   },
   createKey: (payload: ApiKeyCreateInput) =>
     fetchJson<ApiKeyCreatedResponse>("/admin/keys", {
@@ -131,9 +133,11 @@ export const apiClient = {
   },
 
   // --- Alerts ---
-  getAlertRules: (tenantId?: string) => {
+  getAlertRules: async (tenantId?: string): Promise<{ items: AlertRule[]; total: number }> => {
     const url = tenantId ? `/admin/alerts?tenant_id=${tenantId}` : "/admin/alerts";
-    return fetchJson<{ items: AlertRule[]; total: number }>(url);
+    const res = await fetchJson<{ rules?: AlertRule[]; items?: AlertRule[]; total?: number }>(url);
+    const ruleList = res.items || res.rules || [];
+    return { items: ruleList, total: res.total ?? ruleList.length };
   },
   createAlertRule: (payload: AlertRuleCreateInput) =>
     fetchJson<AlertRule>("/admin/alerts", {
@@ -153,9 +157,11 @@ export const apiClient = {
       throw new Error(msg);
     }
   },
-  getAlertHistory: (tenantId?: string) => {
+  getAlertHistory: async (tenantId?: string): Promise<{ items: AlertHistoryItem[]; total: number }> => {
     const url = tenantId ? `/admin/alerts/history?tenant_id=${tenantId}` : "/admin/alerts/history";
-    return fetchJson<{ items: AlertHistoryItem[]; total: number }>(url);
+    const res = await fetchJson<{ history?: AlertHistoryItem[]; items?: AlertHistoryItem[]; total?: number }>(url);
+    const historyList = res.items || res.history || [];
+    return { items: historyList, total: res.total ?? historyList.length };
   },
 
   // --- Gateway Live Request Proxy Tester ---

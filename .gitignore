@@ -1,18 +1,22 @@
-# Python & Bytecode
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-/build/
+env/
+build/
 develop-eggs/
-/dist/
+dist/
 downloads/
 eggs/
 .eggs/
-/parts/
-/sdist/
-/var/
+/lib/
+!frontend/src/lib/
+lib64/
+parts/
+sdist/
+var/
 wheels/
 *.egg-info/
 .installed.cfg
@@ -23,19 +27,9 @@ wheels/
 .venv
 venv/
 ENV/
-env/
 env.bak/
 venv.bak/
-
-# Node & Frontend Build Artifacts
-node_modules/
-**/node_modules/
-.next/
-**/.next/
-out/
-**/out/
-*.tsbuildinfo
-next-env.d.ts
+.postman
 
 # Testing & Coverage
 .pytest_cache/
@@ -43,7 +37,7 @@ next-env.d.ts
 htmlcov/
 *.cover
 
-# IDEs & OS Files
+# IDEs & System
 .vscode/
 .idea/
 *.swp
@@ -58,6 +52,3 @@ Thumbs.db
 clickhouse_data/
 postgres_data/
 redis_data/
-
-# Miscellaneous
-.postman/

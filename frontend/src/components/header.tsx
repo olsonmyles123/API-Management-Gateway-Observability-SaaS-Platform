@@ -24,10 +24,10 @@ export function Header({
   const tenants = Array.isArray(rawTenants) ? rawTenants : [];
 
   return (
-    <header className="h-14 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
-      <div>
-        <h1 className="text-sm font-semibold text-zinc-100 tracking-tight">{title}</h1>
-        {subtitle && <p className="text-xs text-zinc-400">{subtitle}</p>}
+    <header className="min-h-[3.5rem] border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md px-6 py-2.5 flex items-center justify-between sticky top-0 z-30">
+      <div className="flex flex-col justify-center">
+        <h1 className="text-sm font-semibold text-zinc-100 tracking-tight leading-tight">{title}</h1>
+        {subtitle && <p className="text-xs text-zinc-400 leading-tight mt-0.5">{subtitle}</p>}
       </div>
 
       <div className="flex items-center gap-3">
