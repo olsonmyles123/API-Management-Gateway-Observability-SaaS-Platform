@@ -282,3 +282,9 @@ curl -X GET http://localhost:8000/get -H "X-API-Key: <REVOKED_KEY>"
 - **Redis 7**: High-speed metadata caching, sliding-window rate limit state via atomic Lua ZSETs, and short-term stream buffering.
 - **ClickHouse**: Dedicated OLAP column-oriented data store for high-cardinality telemetry event logs.
 - **Strict Separation**: Gateway proxy logs are **never** flushed into PostgreSQL to protect operational metadata throughput.
+
+---
+
+## 📄 7. License
+
+This project is licensed under the [GNU General Public License v3.0 (GPLv3)](file:///d:/Project/Internship/LICENSE).
