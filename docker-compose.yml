@@ -72,7 +72,7 @@ services:
       CLICKHOUSE_DB: default
       CLICKHOUSE_USER: default
       CLICKHOUSE_PASSWORD: ""
-      ENVIRONMENT: production
+      ENVIRONMENT: development
       PORT: 8000
     ports:
       - "8000:8000"

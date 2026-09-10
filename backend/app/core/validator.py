@@ -72,17 +72,17 @@ def validate_safe_url(url: str, allow_localhost: bool = True) -> str:
         if ip in METADATA_NETWORK or ip in IPV6_LINK_LOCAL:
             raise ValueError("Targeting cloud metadata or link-local addresses is strictly prohibited.")
 
-        # 2. Reject multicast / reserved
-        if ip.is_multicast or ip.is_reserved:
-            raise ValueError("Targeting multicast or reserved network addresses is prohibited.")
-
-        # 3. Check loopback & private networks
+        # 2. Check loopback & private networks
         is_prod = (settings.ENVIRONMENT == "production")
         if is_prod or not allow_localhost:
             if ip.is_loopback:
                 raise ValueError("Targeting localhost/loopback addresses is not permitted in this environment.")
             if ip.is_private:
                 raise ValueError("Targeting internal private network addresses (RFC 1918) is prohibited.")
+
+        # 3. Reject multicast / reserved (excluding loopback addresses)
+        if ip.is_multicast or (ip.is_reserved and not ip.is_loopback):
+            raise ValueError("Targeting multicast or reserved network addresses is prohibited.")
 
     except socket.gaierror as e:
         logger.warning(f"DNS resolution failed for '{hostname}': {e}")
