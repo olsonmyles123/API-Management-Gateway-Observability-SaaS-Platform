@@ -88,11 +88,31 @@ export default function ApiKeysPage() {
     },
   });
 
+  const copyToClipboard = (text: string, label: string = "API key") => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      toast.success(`Copied ${label} to clipboard!`);
+    } catch {
+      toast.error("Failed to copy to clipboard");
+    }
+  };
+
   const handleCopySecret = () => {
     if (createdSecret) {
-      navigator.clipboard.writeText(createdSecret.raw_key);
+      copyToClipboard(createdSecret.raw_key, "raw API key");
       setHasCopied(true);
-      toast.success("Copied API key to clipboard!");
       setTimeout(() => setHasCopied(false), 2000);
     }
   };
@@ -154,9 +174,14 @@ export default function ApiKeysPage() {
                           {k.name}
                         </td>
                         <td className="py-2.5 px-3 text-zinc-300">
-                          <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 font-medium border border-zinc-700/60">
-                            {k.key_prefix}...
-                          </span>
+                          <button
+                            onClick={() => copyToClipboard(k.key_prefix, "key prefix")}
+                            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium border border-zinc-700/60 cursor-pointer transition-colors"
+                            title="Click to copy key prefix"
+                          >
+                            <span>{k.key_prefix}...</span>
+                            <Copy className="h-3 w-3 text-zinc-400" />
+                          </button>
                         </td>
                         <td className="py-2.5 px-3 text-zinc-300 font-sans">
                           {tenant ? `${tenant.name} (${tenant.slug})` : k.tenant_id.slice(0, 8)}
@@ -174,17 +199,26 @@ export default function ApiKeysPage() {
                           {new Date(k.created_at).toLocaleDateString()}
                         </td>
                         <td className="py-2.5 px-3 text-right">
-                          <button
-                            onClick={() => {
-                              if (confirm(`Permanently revoke key '${k.name}'?`)) {
-                                revokeMutation.mutate(k.id);
-                              }
-                            }}
-                            className="text-zinc-500 hover:text-rose-400 p-1 rounded transition-colors cursor-pointer"
-                            title="Revoke Key"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
+                          <div className="flex items-center justify-end gap-1">
+                            <button
+                              onClick={() => copyToClipboard(k.key_prefix, "key prefix")}
+                              className="text-zinc-500 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
+                              title="Copy Key Prefix"
+                            >
+                              <Copy className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (confirm(`Permanently revoke key '${k.name}'?`)) {
+                                  revokeMutation.mutate(k.id);
+                                }
+                              }}
+                              className="text-zinc-500 hover:text-rose-400 p-1 rounded transition-colors cursor-pointer"
+                              title="Revoke Key"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
