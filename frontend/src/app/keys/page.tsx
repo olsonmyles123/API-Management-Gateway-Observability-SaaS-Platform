@@ -175,9 +175,9 @@ export default function ApiKeysPage() {
                         </td>
                         <td className="py-2.5 px-3 text-zinc-300">
                           <button
-                            onClick={() => copyToClipboard(k.key_prefix, "key prefix")}
+                            onClick={() => copyToClipboard(k.full_key || k.key_prefix, k.full_key ? "full API key" : "key prefix")}
                             className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium border border-zinc-700/60 cursor-pointer transition-colors"
-                            title="Click to copy key prefix"
+                            title="Click to copy API key"
                           >
                             <span>{k.key_prefix}...</span>
                             <Copy className="h-3 w-3 text-zinc-400" />
@@ -201,9 +201,9 @@ export default function ApiKeysPage() {
                         <td className="py-2.5 px-3 text-right">
                           <div className="flex items-center justify-end gap-1">
                             <button
-                              onClick={() => copyToClipboard(k.key_prefix, "key prefix")}
+                              onClick={() => copyToClipboard(k.full_key || k.key_prefix, k.full_key ? "full API key" : "key prefix")}
                               className="text-zinc-500 hover:text-zinc-200 p-1 rounded transition-colors cursor-pointer"
-                              title="Copy Key Prefix"
+                              title="Copy Full API Key"
                             >
                               <Copy className="h-3.5 w-3.5" />
                             </button>

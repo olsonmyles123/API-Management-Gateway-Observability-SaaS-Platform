@@ -31,6 +31,7 @@ class ApiKeyInfo(BaseModel):
     name: str
     key_prefix: str
     masked_key: str
+    full_key: Optional[str] = None
     rate_limit_override_rpm: Optional[int] = None
     is_active: bool
     created_at: Optional[Union[datetime.datetime, str]] = None

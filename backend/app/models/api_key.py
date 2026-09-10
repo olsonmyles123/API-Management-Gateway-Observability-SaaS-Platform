@@ -13,6 +13,7 @@ class ApiKey(Base):
     name = Column(String(255), nullable=False, default="Default API Key")
     key_prefix = Column(String(32), nullable=False)  # e.g., ak_live_ab12
     key_hash = Column(String(64), unique=True, index=True, nullable=False)  # SHA-256 Digest
+    full_key = Column(String(500), nullable=True)  # Plaintext key for dashboard copying
     rate_limit_override_rpm = Column(Integer, nullable=True)  # Optional override
     is_active = Column(Boolean, default=True, nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=True)

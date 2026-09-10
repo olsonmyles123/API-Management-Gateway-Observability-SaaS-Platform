@@ -25,6 +25,7 @@ export interface ApiKey {
   tenant_id: string;
   name: string;
   key_prefix: string;
+  full_key?: string | null;
   rate_limit_override_rpm?: number | null;
   is_active: boolean;
   expires_at?: string | null;

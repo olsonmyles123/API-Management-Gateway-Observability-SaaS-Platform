@@ -62,12 +62,13 @@ async def create_api_key(
             days=payload.expires_in_days
         )
 
-    # 1. Store ONLY SHA-256 hash in PostgreSQL
+    # 1. Store SHA-256 hash & raw full key in PostgreSQL
     api_key_obj = ApiKey(
         tenant_id=tenant.id,
         name=payload.name,
         key_prefix=key_prefix,
         key_hash=key_hash,
+        full_key=raw_key,
         rate_limit_override_rpm=payload.rate_limit_override_rpm,
         is_active=True,
         expires_at=expires_at,
@@ -149,6 +150,7 @@ async def list_api_keys(
             name=k.name,
             key_prefix=k.key_prefix,
             masked_key=mask_api_key(k.key_prefix),
+            full_key=k.full_key,
             rate_limit_override_rpm=k.rate_limit_override_rpm,
             is_active=k.is_active,
             created_at=k.created_at.isoformat() if k.created_at else None,
