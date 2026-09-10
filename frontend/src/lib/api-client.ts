@@ -32,11 +32,22 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
     let errorDetail = "An unexpected error occurred.";
     try {
       const errorJson = await res.json();
-      errorDetail = errorJson.detail || errorJson.error || JSON.stringify(errorJson);
+      // Handle FastAPI/Pydantic validation errors: detail is an array of objects
+      if (Array.isArray(errorJson.detail)) {
+        errorDetail = errorJson.detail
+          .map((e: any) => e.msg || JSON.stringify(e))
+          .join("; ");
+      } else if (typeof errorJson.detail === "string") {
+        errorDetail = errorJson.detail;
+      } else if (typeof errorJson.error === "string") {
+        errorDetail = errorJson.error;
+      } else {
+        errorDetail = `Request failed with status ${res.status}`;
+      }
     } catch {
-      errorDetail = await res.text();
+      errorDetail = (await res.text().catch(() => "")) || `HTTP Error ${res.status}`;
     }
-    throw new Error(errorDetail || `HTTP Error ${res.status}`);
+    throw new Error(errorDetail);
   }
 
   return res.json();
@@ -72,10 +83,19 @@ export const apiClient = {
       body: JSON.stringify(payload),
     }),
   getTenant: (id: string) => fetchJson<Tenant>(`/admin/tenants/${id}`),
-  deleteTenant: (id: string) =>
-    fetchJson<{ message: string }>(`/admin/tenants/${id}`, {
+  deleteTenant: async (id: string): Promise<void> => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    const res = await fetch(`${API_BASE_URL}/admin/tenants/${id}`, {
       method: "DELETE",
-    }),
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      credentials: "include",
+    });
+    if (!res.ok) {
+      let msg = `Failed to delete tenant (HTTP ${res.status})`;
+      try { const j = await res.json(); msg = (typeof j.detail === "string" ? j.detail : null) || msg; } catch {}
+      throw new Error(msg);
+    }
+  },
 
   // --- API Keys ---
   getKeys: (tenantId?: string) => {
@@ -87,10 +107,19 @@ export const apiClient = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  revokeKey: (keyId: string) =>
-    fetchJson<{ message: string }>(`/admin/keys/${keyId}`, {
+  revokeKey: async (keyId: string): Promise<void> => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    const res = await fetch(`${API_BASE_URL}/admin/keys/${keyId}`, {
       method: "DELETE",
-    }),
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      credentials: "include",
+    });
+    if (!res.ok) {
+      let msg = `Failed to revoke key (HTTP ${res.status})`;
+      try { const j = await res.json(); msg = (typeof j.detail === "string" ? j.detail : null) || msg; } catch {}
+      throw new Error(msg);
+    }
+  },
 
   // --- Metrics & Analytics ---
   getMetrics: (tenantId?: string, timeWindowSeconds: number = 3600, route?: string) => {
@@ -111,10 +140,19 @@ export const apiClient = {
       method: "POST",
       body: JSON.stringify(payload),
     }),
-  deleteAlertRule: (ruleId: string) =>
-    fetchJson<{ message: string }>(`/admin/alerts/${ruleId}`, {
+  deleteAlertRule: async (ruleId: string): Promise<void> => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    const res = await fetch(`${API_BASE_URL}/admin/alerts/${ruleId}`, {
       method: "DELETE",
-    }),
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      credentials: "include",
+    });
+    if (!res.ok) {
+      let msg = `Failed to delete alert rule (HTTP ${res.status})`;
+      try { const j = await res.json(); msg = (typeof j.detail === "string" ? j.detail : null) || msg; } catch {}
+      throw new Error(msg);
+    }
+  },
   getAlertHistory: (tenantId?: string) => {
     const url = tenantId ? `/admin/alerts/history?tenant_id=${tenantId}` : "/admin/alerts/history";
     return fetchJson<{ items: AlertHistoryItem[]; total: number }>(url);
