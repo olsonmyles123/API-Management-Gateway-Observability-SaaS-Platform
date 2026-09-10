@@ -5,9 +5,12 @@ from app.core.redis import push_telemetry_stream, get_redis_client
 from app.config import settings
 
 
+import uuid
+
+
 @pytest.mark.asyncio
 async def test_clickhouse_telemetry_percentile_calculations():
-    tenant_id = "test_tenant_olap_1"
+    tenant_id = f"test_tenant_olap_{uuid.uuid4().hex[:8]}"
 
     # Insert 10 synthetic telemetry records with varying latencies
     # latencies: 10, 20, 30, 40, 50, 60, 70, 80, 90, 500 ms (1 error 500)
