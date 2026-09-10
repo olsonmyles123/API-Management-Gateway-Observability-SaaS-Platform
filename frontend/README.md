@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# API Gateway & Observability SaaS — Frontend Web App
 
-## Getting Started
+A modern, high-performance web dashboard built with **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS**, **Lucide Icons**, **Recharts**, and **TanStack React Query**.
 
-First, run the development server:
+---
 
+## ✨ Features
+
+- 🔐 **Authentication & Session Management**: Secure JWT token storage, role-based auth guard, professional login & registration screens.
+- 🏢 **Multi-Tenant Management**: Register upstream APIs, configure custom plan tiers, define rate limits (RPM & Burst), and edit tenant configurations.
+- 🔑 **API Key Lifecycle**: Generate cryptographically secure API keys with prefixing, rate-limit overrides, copy-to-clipboard, and instant revocation.
+- 📊 **Real-Time OLAP Observability**: Live charts for request volume, error rate %, $P_{50}/P_{95}/P_{99}$ latency percentiles, status breakdown (2xx/4xx/5xx), and bandwidth transfer.
+- 🚨 **Automated Alert Rules**: Set latency and error rate threshold rules, configure external webhook endpoints, and run live dispatch tests.
+- ⚡ **Interactive API Playground**: Built-in test console to send live requests through the API Gateway, view status codes, response headers, rate-limit headers, and latency metrics.
+- 🎨 **Modern Dark Aesthetics**: Premium dark theme with glassmorphic cards, smooth micro-interactions, and responsive layout.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 16 (Turbopack)](https://nextjs.org/)
+- **UI Library**: [React 19](https://react.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Data Fetching**: [@tanstack/react-query](https://tanstack.com/query)
+- **Charts & Graphs**: [Recharts](https://recharts.org/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Notifications**: [Sonner](https://sonner.emilkowal.ski/)
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+- **Node.js**: v18.17+ or v20+
+- **npm**, **pnpm**, or **yarn**
+
+### 2. Install Dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 3. Configure Environment
+Create a `.env.local` file (optional, defaults to `http://localhost:8000`):
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 4. Run Development Server
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📁 Project Structure
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+frontend/
+├── public/              # Static assets, logo, favicons
+├── src/
+│   ├── app/
+│   │   ├── alerts/      # Alert rules & webhook history
+│   │   ├── keys/        # API key generation & revocation
+│   │   ├── login/       # User authentication page
+│   │   ├── playground/  # Interactive live API test console
+│   │   ├── register/    # New user onboarding page
+│   │   ├── tenants/     # Tenant management & upstream mapping
+│   │   ├── globals.css  # Global styles & theme definitions
+│   │   ├── layout.tsx   # Root layout & theme providers
+│   │   └── page.tsx     # Overview analytics dashboard
+│   ├── components/      # Reusable UI components (Sidebar, Header, MetricCard, etc.)
+│   ├── context/         # AuthContext & global state
+│   └── lib/             # API client, TypeScript definitions, and utility helpers
+├── package.json
+└── tsconfig.json
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📜 Available Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `npm run dev` — Starts local development server with Turbopack on port 3000.
+- `npm run build` — Builds production-optimized bundle.
+- `npm run start` — Starts Next.js production server.
+- `npm run lint` — Runs ESLint checks.
