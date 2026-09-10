@@ -1,0 +1,128 @@
+version: "3.8"
+
+services:
+  # 1. PostgreSQL 15 - Control Plane Operational Metadata
+  postgres:
+    image: postgres:15-alpine
+    container_name: apigateway_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: apigateway_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d apigateway_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis 7 - Cache, Sliding-Window ZSET Rate Limiter, and Streams Buffer
+  redis:
+    image: redis:7-alpine
+    container_name: apigateway_redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 3. ClickHouse Server - High-Cardinality OLAP Telemetry Engine
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.8-alpine
+    container_name: apigateway_clickhouse
+    restart: unless-stopped
+    ports:
+      - "8123:8123"  # HTTP Interface
+      - "9000:9000"  # Native Client
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --query 'SELECT 1' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # 4. FastAPI High-Performance API Gateway & Control Plane
+  gateway_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apigateway_api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgrespassword@postgres:5432/apigateway_db
+      REDIS_URL: redis://redis:6379/0
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+      ENVIRONMENT: production
+      PORT: 8000
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+  # 5. Telemetry Stream Ingestion Background Worker
+  telemetry_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apigateway_telemetry_worker
+    restart: unless-stopped
+    command: ["python", "-m", "app.workers.telemetry_worker"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgrespassword@postgres:5432/apigateway_db
+      REDIS_URL: redis://redis:6379/0
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+    depends_on:
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+  # 6. Real-Time Alert Engine Daemon
+  alert_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apigateway_alert_worker
+    restart: unless-stopped
+    command: ["python", "-m", "app.workers.alert_worker"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgrespassword@postgres:5432/apigateway_db
+      REDIS_URL: redis://redis:6379/0
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  clickhouse_data:
